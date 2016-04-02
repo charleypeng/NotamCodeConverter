@@ -8,8 +8,11 @@ To use the class you must also download the json data as a database, and set the
 ###Legal#########################################
 This project is under the terms of LGPL V3
 
+Thanks Microsoft vistualstudio for community, and NewtonSoft's Json.Net
 
 ###Contact#######################################
-for more help please contact me via https://twitter.com/cagayapeng
+I am new to this programming world, love to learn new things.
+
+contact me via https://twitter.com/cagayapeng
 
 
