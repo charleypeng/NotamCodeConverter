@@ -35,7 +35,7 @@ namespace NotamCodeConverter
         /// </summary>
         /// <param name="FilePath"></param>
         /// <returns></returns>
-        private string GetJsonString(string FilePath)
+        protected virtual string GetJsonString(string FilePath)
         {
             if (!File.Exists(FilePath)) return string.Empty;
             try
@@ -54,7 +54,7 @@ namespace NotamCodeConverter
         /// Initialize database
         /// </summary>
         /// <returns></returns>
-        private IEnumerable<CodeItem> InitializeDB()
+        protected virtual IEnumerable<CodeItem> InitializeDB()
         {
             IEnumerable<CodeItem> db = null;
             try
@@ -74,7 +74,7 @@ namespace NotamCodeConverter
         /// </summary>
         /// <param name="code">4 integers</param>
         /// <returns>Chinese Character</returns>
-        protected string GetCharacter(string scode)
+        protected virtual string GetCharacter(string scode)
         {
             string data = string.Empty;
             if (db == null) return scode;  //if no database then display scode as orignal data
