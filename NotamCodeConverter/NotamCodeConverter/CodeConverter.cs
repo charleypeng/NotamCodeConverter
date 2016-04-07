@@ -100,7 +100,7 @@ namespace NotamCodeConverter
 
 
         /// <summary>
-        /// initialize ICodeConverter
+        /// Initialize ICodeConverter
         /// </summary>
         protected ICodeConverter()
         {
@@ -240,7 +240,7 @@ namespace NotamCodeConverter
             try
             {
                 string[] strlst = null;
-                //to confir the Notam Contains "\r\n"
+                //to confirm the Notam Contains "\r\n"
                 
                 if (NotamString.Contains('\n') || NotamString.Contains('\r'))
                 {
