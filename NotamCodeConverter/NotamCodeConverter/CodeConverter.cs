@@ -159,7 +159,6 @@ namespace NotamCodeConverter
         {
             if (string.IsNullOrWhiteSpace(StringData)) return StringData;
 
-            StringData = StringData.Trim();
             if (!StringData.Contains(Symbol.ToString())) return StringData;
             else
             {
@@ -253,11 +252,11 @@ namespace NotamCodeConverter
                         foreach (var str in strs)
                         {
                             var item = str;
-                            if (isNotamCode(item))
+                            if (isNotamCode(str))
                             {
-                                item = GetCharacter(item.Trim()); // return Chinese character
+                                item = GetCharacter(str); // return Chinese character
                             }
-                            strData = strData + item;  //form into a line
+                            strData = strData + item+ " ";  //form into a line
                         }
                         strData = strData + Environment.NewLine; // form into Notam Text
                     }
@@ -268,8 +267,8 @@ namespace NotamCodeConverter
                     foreach (var str in strs)
                     {
                         var item = str;
-                        if (isNotamCode(item)) item = GetCharacter(item.Trim()); // Return Chinese character
-                        strData = strData + item;
+                        if (isNotamCode(item)) item = GetCharacter(item); // Return Chinese character
+                        strData = strData + item + " ";
                     }
                 }
                 
