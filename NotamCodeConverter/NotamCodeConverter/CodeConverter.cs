@@ -1,6 +1,6 @@
 ﻿/// <summary>
 /// NotamCodeDecoder
-/// Auther: Peng Lei
+/// Author: Peng Lei
 /// Date: 2016-1-12
 /// This Project is under the terms of LGPL
 /// </summary>
