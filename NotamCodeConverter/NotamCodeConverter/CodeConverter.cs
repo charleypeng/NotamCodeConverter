@@ -111,7 +111,7 @@ namespace NotamCodeConverter
     /// <summary>
     /// Notam Code Decoder
     /// </summary>
-    public sealed class  CodeConverter:ICodeConverter
+    public class  CodeConverter:ICodeConverter
     {
         /// <summary>
         /// To confirm the characters are al ASCSII  numbers
