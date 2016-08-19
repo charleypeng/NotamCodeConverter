@@ -1,83 +1,42 @@
 ﻿/// <summary>
 /// NotamCodeDecoder
-/// Author: Peng Lei
+/// Auther: Peng Lei
 /// Date: 2016-1-12
 /// This Project is under the terms of LGPL
 /// </summary>
 using System;
 using System.IO;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-namespace NotamCodeConverter
+using SQLite;
+using System.Threading.Tasks;
+
+namespace NOTAMer
 {
     /// <summary>
-    /// code convert interface
+    /// Notam Code Decoder
     /// </summary>
-    public abstract class ICodeConverter
+    public class CodeConverter
     {
         /// <summary>
-        /// Data File Path
+        /// Database file path
         /// </summary>
-        public string FilePath
-        {
-            get;
-            set;
-        } = Directory.GetCurrentDirectory() + @"\CodeData.json";
-
-        /// <summary>
-        /// Chinese Character Code Database in Json file
-        /// </summary>
-        private IEnumerable<CodeItem> db { get; set; }
-
-        /// <summary>
-        /// Read Json
-        /// </summary>
-        /// <param name="FilePath"></param>
-        /// <returns></returns>
-        protected virtual string GetJsonString(string FilePath)
-        {
-            if (!File.Exists(FilePath)) return string.Empty;
-            try
-            {
-                var str = File.ReadAllText(FilePath, System.Text.Encoding.UTF8);
-                return str;
-            }
-            catch (Exception)
-            {
-                return string.Empty;
-                throw new IOException(string.Format("Error when reading from file -{0}", FilePath));
-            }
-        }
-
-        /// <summary>
-        /// Initialize database
-        /// </summary>
-        /// <returns></returns>
-        protected virtual IEnumerable<CodeItem> InitializeDB()
-        {
-            IEnumerable<CodeItem> db = null;
-            try
-            {
-                var jstring = GetJsonString(FilePath);
-                db = JsonConvert.DeserializeObject<IEnumerable<CodeItem>>(jstring);
-            }
-            catch (Exception)
-            {
-                throw new JsonException("error when deserialize json object");
-            }
-            return db;
-        }
+        public string DBPath { get; set; } = Directory.GetCurrentDirectory() + @"\CodeData.db";
 
         /// <summary>
         /// Return the Chinese Character
+        /// *Async
         /// </summary>
-        /// <param name="code">4 integers</param>
-        /// <returns>Chinese Character</returns>
-        protected virtual string GetCharacter(string scode)
+        /// <param name="scode">4 digi code</param>
+        /// <returns>Chinese character</returns>
+        public virtual async Task<string> GetCharacterAsync(string scode)
         {
             string data = string.Empty;
-            if (db == null) return scode;  //if no database then display scode as orignal data
+            if (!File.Exists(DBPath)) return scode;
+
+            var conn = new SQLiteAsyncConnection(DBPath);
+            if (conn == null) return scode;
+
             try
             {
                 scode = scode.Trim();
@@ -86,33 +45,59 @@ namespace NotamCodeConverter
             {
                 scode = string.Empty;
             }
+
             if (scode.Count() != 4 || string.IsNullOrEmpty(scode)) return string.Empty;
+
             try
             {
-                data = db.Single(x => x.Code.Trim() == scode).Character;
+                var lst = await conn.Table<CodeItem>().Where(x => x.Code == scode).ToListAsync();
+
+                data = lst.FirstOrDefault().Character;
             }
             catch (Exception)
             {
                 return string.Empty;
             }
+
             return data;
         }
 
-
         /// <summary>
-        /// Initialize ICodeConverter
+        /// Return the Chinese Character
         /// </summary>
-        protected ICodeConverter()
+        /// <param name="scode">4 digi code</param>
+        /// <returns>Chinese character</returns>
+        public virtual string GetCharacter(string scode)
         {
-            db = InitializeDB();
-        }
-    }
+            string data = string.Empty;
+            if (!File.Exists(DBPath)) return scode;
 
-    /// <summary>
-    /// Notam Code Decoder
-    /// </summary>
-    public class  CodeConverter:ICodeConverter
-    {
+            var conn = new SQLiteConnection(DBPath);
+            if (conn == null) return scode;
+
+            try
+            {
+                scode = scode.Trim();
+            }
+            catch (Exception)
+            {
+                scode = string.Empty;
+            }
+
+            if (scode.Count() != 4 || string.IsNullOrEmpty(scode)) return string.Empty;
+
+            try
+            {
+                data = conn.Table<CodeItem>().Where(x => x.Code == scode).FirstOrDefault().Character;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
+
+            return data;
+        }
+
         /// <summary>
         /// To confirm the characters are al ASCSII  numbers
         /// </summary>
@@ -127,6 +112,7 @@ namespace NotamCodeConverter
             }
             return true;
         }
+
         /// <summary>
         /// To confirm wheather it is a Notam Code
         /// </summary>
@@ -231,6 +217,62 @@ namespace NotamCodeConverter
         /// </summary>
         /// <param name="NotamString">NOTAM String</param>
         /// <returns>Decoded Notam String for Chinese character</returns>
+        public async Task<string> DecodeNotamAsync(string NotamString)
+        {
+            //TODO add bool to confirm it is NOTAM E section or not.
+            string strData = string.Empty;
+            if (string.IsNullOrWhiteSpace(NotamString)) return string.Empty;
+            try
+            {
+                string[] strlst = null;
+                //to confirm the Notam Contains "\r\n"
+
+                if (NotamString.Contains('\n') || NotamString.Contains('\r'))
+                {
+                    if (NotamString.Contains('\n')) strlst = NotamString.Split('\n');
+                    if (NotamString.Contains('\r')) strlst = NotamString.Split('\r');
+
+                    foreach (var lstItem in strlst)
+                    {
+                        var strs = lstItem.Split(' ');
+                        foreach (var str in strs)
+                        {
+                            var item = str;
+                            if (isNotamCode(str))
+                            {
+                                item = await GetCharacterAsync(str); // return Chinese character
+                            }
+                            strData = strData + item + " ";  //form into a line
+                        }
+                        strData = strData + Environment.NewLine; // form into Notam Text
+                    }
+                }
+                else
+                {
+                    var strs = NotamString.Split(' ');
+                    foreach (var str in strs)
+                    {
+                        var item = str;
+                        if (isNotamCode(item)) item = await GetCharacterAsync(item); // Return Chinese character
+                        strData = strData + item + " ";
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("error when decode the Notam code", ex);
+            }
+            return strData;
+        }
+
+        /// <summary>
+        /// Decode the given NOTAM string
+        /// only suitable for the Notam E section at present
+        /// use it in other phrase may cause abnormal display of NOTAM
+        /// </summary>
+        /// <param name="NotamString">NOTAM String</param>
+        /// <returns>Decoded Notam String for Chinese character</returns>
         public string DecodeNotam(string NotamString)
         {
             //TODO add bool to confirm it is NOTAM E section or not.
@@ -240,7 +282,7 @@ namespace NotamCodeConverter
             {
                 string[] strlst = null;
                 //to confirm the Notam Contains "\r\n"
-                
+
                 if (NotamString.Contains('\n') || NotamString.Contains('\r'))
                 {
                     if (NotamString.Contains('\n')) strlst = NotamString.Split('\n');
@@ -256,7 +298,7 @@ namespace NotamCodeConverter
                             {
                                 item = GetCharacter(str); // return Chinese character
                             }
-                            strData = strData + item+ " ";  //form into a line
+                            strData = strData + item + " ";  //form into a line
                         }
                         strData = strData + Environment.NewLine; // form into Notam Text
                     }
@@ -271,7 +313,7 @@ namespace NotamCodeConverter
                         strData = strData + item + " ";
                     }
                 }
-                
+
             }
             catch (Exception ex)
             {
