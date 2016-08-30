@@ -99,7 +99,7 @@ namespace NOTAMer
         }
 
         /// <summary>
-        /// To confirm the characters are al ASCSII  numbers
+        /// To confirm the characters are all ASCSII  numbers
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
