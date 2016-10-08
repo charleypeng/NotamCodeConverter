@@ -11,7 +11,7 @@ using System.Linq;
 using SQLite;
 using System.Threading.Tasks;
 
-namespace NOTAMer
+namespace NotamDecoder
 {
     /// <summary>
     /// Notam Code Decoder
@@ -31,64 +31,21 @@ namespace NOTAMer
         /// <returns>Chinese character</returns>
         public virtual async Task<string> GetCharacterAsync(string scode)
         {
+            if (string.IsNullOrWhiteSpace(scode)) return string.Empty;
+
+            var _scode = scode.Trim();
+            var conn = new SQLiteAsyncConnection(DBPath);
             string data = string.Empty;
+
             if (!File.Exists(DBPath)) return scode;
 
-            var conn = new SQLiteAsyncConnection(DBPath);
-            if (conn == null) return scode;
-
             try
             {
-                scode = scode.Trim();
-            }
-            catch (Exception)
-            {
-                scode = string.Empty;
-            }
+                var lst = await conn.Table<CodeItem>().Where(x => x.Code == _scode).ToListAsync();
 
-            if (scode.Count() != 4 || string.IsNullOrEmpty(scode)) return string.Empty;
-
-            try
-            {
-                var lst = await conn.Table<CodeItem>().Where(x => x.Code == scode).ToListAsync();
+                if (lst == null) return scode;
 
                 data = lst.FirstOrDefault().Character;
-            }
-            catch (Exception)
-            {
-                return string.Empty;
-            }
-
-            return data;
-        }
-
-        /// <summary>
-        /// Return the Chinese Character
-        /// </summary>
-        /// <param name="scode">4 digi code</param>
-        /// <returns>Chinese character</returns>
-        public virtual string GetCharacter(string scode)
-        {
-            string data = string.Empty;
-            if (!File.Exists(DBPath)) return scode;
-
-            var conn = new SQLiteConnection(DBPath);
-            if (conn == null) return scode;
-
-            try
-            {
-                scode = scode.Trim();
-            }
-            catch (Exception)
-            {
-                scode = string.Empty;
-            }
-
-            if (scode.Count() != 4 || string.IsNullOrEmpty(scode)) return string.Empty;
-
-            try
-            {
-                data = conn.Table<CodeItem>().Where(x => x.Code == scode).FirstOrDefault().Character;
             }
             catch (Exception)
             {
@@ -254,62 +211,6 @@ namespace NOTAMer
                     {
                         var item = str;
                         if (isNotamCode(item)) item = await GetCharacterAsync(item); // Return Chinese character
-                        strData = strData + item + " ";
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("error when decode the Notam code", ex);
-            }
-            return strData;
-        }
-
-        /// <summary>
-        /// Decode the given NOTAM string
-        /// only suitable for the Notam E section at present
-        /// use it in other phrase may cause abnormal display of NOTAM
-        /// </summary>
-        /// <param name="NotamString">NOTAM String</param>
-        /// <returns>Decoded Notam String for Chinese character</returns>
-        public string DecodeNotam(string NotamString)
-        {
-            //TODO add bool to confirm it is NOTAM E section or not.
-            string strData = string.Empty;
-            if (string.IsNullOrWhiteSpace(NotamString)) return string.Empty;
-            try
-            {
-                string[] strlst = null;
-                //to confirm the Notam Contains "\r\n"
-
-                if (NotamString.Contains('\n') || NotamString.Contains('\r'))
-                {
-                    if (NotamString.Contains('\n')) strlst = NotamString.Split('\n');
-                    if (NotamString.Contains('\r')) strlst = NotamString.Split('\r');
-
-                    foreach (var lstItem in strlst)
-                    {
-                        var strs = lstItem.Split(' ');
-                        foreach (var str in strs)
-                        {
-                            var item = str;
-                            if (isNotamCode(str))
-                            {
-                                item = GetCharacter(str); // return Chinese character
-                            }
-                            strData = strData + item + " ";  //form into a line
-                        }
-                        strData = strData + Environment.NewLine; // form into Notam Text
-                    }
-                }
-                else
-                {
-                    var strs = NotamString.Split(' ');
-                    foreach (var str in strs)
-                    {
-                        var item = str;
-                        if (isNotamCode(item)) item = GetCharacter(item); // Return Chinese character
                         strData = strData + item + " ";
                     }
                 }

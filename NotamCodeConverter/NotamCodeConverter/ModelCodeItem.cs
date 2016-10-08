@@ -5,7 +5,7 @@
 /// This Project is under the terms of LGPL
 /// </summary>
 using SQLite;
-namespace NOTAMer
+namespace NotamDecoder
 {
     /// <summary>
     /// CodeModel
