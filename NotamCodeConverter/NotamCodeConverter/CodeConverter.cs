@@ -32,15 +32,13 @@ namespace NotamDecoder
         public virtual async Task<string> GetCharacterAsync(string scode)
         {
             if (string.IsNullOrWhiteSpace(scode)) return string.Empty;
-
-            var _scode = scode.Trim();
-            var conn = new SQLiteAsyncConnection(DBPath);
             string data = string.Empty;
-
-            if (!File.Exists(DBPath)) return scode;
-
             try
             {
+                var _scode = scode.Trim();
+                var conn = new SQLiteAsyncConnection(DBPath);              
+
+                if (!File.Exists(DBPath)) return scode;
                 var lst = await conn.Table<CodeItem>().Where(x => x.Code == _scode).ToListAsync();
 
                 if (lst == null) return scode;
