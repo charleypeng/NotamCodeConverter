@@ -181,7 +181,7 @@ namespace NotamDecoder
             {
                 string[] strlst = null;
                 //to confirm the Notam Contains "\r\n"
-
+                NotamString = NotamString.Trim();
                 if (NotamString.Contains('\n') || NotamString.Contains('\r'))
                 {
                     if (NotamString.Contains('\n')) strlst = NotamString.Split('\n');
@@ -189,7 +189,7 @@ namespace NotamDecoder
 
                     foreach (var lstItem in strlst)
                     {
-                        var strs = lstItem.Split(' ');
+                        var strs = lstItem.Trim().Split(' ');
                         foreach (var str in strs)
                         {
                             var item = str;
