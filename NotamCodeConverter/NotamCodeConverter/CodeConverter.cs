@@ -31,26 +31,22 @@ namespace NotamDecoder
         /// <returns>Chinese character</returns>
         public virtual async Task<string> GetCharacterAsync(string scode)
         {
-            if (string.IsNullOrWhiteSpace(scode)) return string.Empty;
+            if (string.IsNullOrWhiteSpace(scode)) return scode;
             string data = string.Empty;
             try
             {
                 var _scode = scode.Trim();
-                var conn = new SQLiteAsyncConnection(DBPath);              
-
                 if (!File.Exists(DBPath)) return scode;
-                var lst = await conn.Table<CodeItem>().Where(x => x.Code == _scode).ToListAsync();
+                var item = await conn.Table<CodeItem>().Where(x => x.Code == _scode).FirstOrDefaultAsync();
 
-                if (lst == null) return scode;
+                if (item == null) return scode;
 
-                data = lst.FirstOrDefault().Character;
+                return item.Character;
             }
             catch (Exception)
             {
-                return string.Empty;
+                return scode;
             }
-
-            return data;
         }
 
         /// <summary>
