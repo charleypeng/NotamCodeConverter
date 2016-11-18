@@ -24,8 +24,8 @@ namespace NotamDecoder
         /// </summary>
         public CodeConverter()
         {
-            if (!File.Exists(DBPath)) throw new ArgumentNullException("The given database path does not exist");
-            conn = new SQLiteAsyncConnection(DBPath);
+            if (File.Exists(DBPath))
+                conn = new SQLiteAsyncConnection(DBPath);
         }
         /// <summary>
         /// Database file path
@@ -40,6 +40,7 @@ namespace NotamDecoder
         /// <returns>Chinese character</returns>
         public virtual async Task<string> GetCharacterAsync(string scode)
         {
+            if (conn == null) return scode;
             if (string.IsNullOrWhiteSpace(scode)) return scode;
             string data = string.Empty;
             try
