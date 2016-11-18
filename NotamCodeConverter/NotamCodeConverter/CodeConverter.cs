@@ -18,10 +18,19 @@ namespace NotamDecoder
     /// </summary>
     public class CodeConverter
     {
+        private SQLiteAsyncConnection conn;
+        /// <summary>
+        /// The init part for the decoder
+        /// </summary>
+        public CodeConverter()
+        {
+            if (!File.Exists(DBPath)) throw new ArgumentNullException("The given database path does not exist");
+            conn = new SQLiteAsyncConnection(DBPath);
+        }
         /// <summary>
         /// Database file path
         /// </summary>
-        public string DBPath { get; set; } = Directory.GetCurrentDirectory() + @"\CodeData.db";
+        public static string DBPath { get; set; } = Directory.GetCurrentDirectory() + @"\CodeData.db";
 
         /// <summary>
         /// Return the Chinese Character
