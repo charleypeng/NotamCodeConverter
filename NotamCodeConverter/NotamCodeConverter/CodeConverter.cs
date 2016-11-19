@@ -24,8 +24,16 @@ namespace NotamDecoder
         /// </summary>
         public CodeConverter()
         {
-            if (File.Exists(DBPath))
+            if (!File.Exists(DBPath)) return;
+            try
+            {
                 conn = new SQLiteAsyncConnection(DBPath);
+            }
+            catch (Exception)
+            {
+                conn = null;
+            }
+                
         }
         /// <summary>
         /// Database file path
