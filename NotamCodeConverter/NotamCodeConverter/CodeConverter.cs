@@ -95,7 +95,7 @@ namespace NotamDecoder
                 else
                 {
                     Code = Code.Trim();
-                    if (isNum(Code) && Code.Count() == 4) return true; else return false;
+                    return  (isNum(Code) && Code.Count() == 4);
                 }
             }
             catch (Exception)
