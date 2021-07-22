@@ -12,6 +12,6 @@ Thanks Microsoft vistualstudio for community, and NewtonSoft's Json.Net
 ## Contact
 I am new to this programming world, love to learn new things.
 
-contact me via https://twitter.com/cagayapeng
+contact me via https://blog.pengandfan.com/
 
 
